@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Test
 
 ```bash
+cd scripts
 dotnet build
 dotnet test
 dotnet test --filter "FullyQualifiedName~QueryExecutorTests.ExecuteQueryAsync_ReturnsMarkdownTable"
@@ -16,7 +17,7 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 
 **Sharp-DB** is a CLI tool and Claude Code Skill for querying PostgreSQL, MySQL, and SQLite databases.
 
-### Core modules (`src/SharpDb/`)
+### Core modules (`scripts/src/SharpDb/`)
 
 - **`Program.cs`** — CLI entry point with three commands: `query`, `tables`, `columns`. Argument parsing is manual (no framework).
 - **`QueryExecutor.cs`** — Executes arbitrary SQL and returns results as markdown tables. Non-SELECT statements return `Rows affected: N`.
@@ -29,7 +30,7 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 - **`DbConnectionFactory.cs`** — Factory creating ADO.NET `DbConnection` instances (Npgsql, MySql.Data, Sqlite).
 - **`MarkdownTableFormatter.cs`** — Converts `DbDataReader` to GitHub-flavored markdown tables with proper escaping.
 
-### Test project (`test/SharpDbTest/`)
+### Test project (`scripts/test/SharpDbTest/`)
 
 - Uses **NUnit** with SQLite in-memory databases.
 - `InMemorySqliteDatabase` helper creates a shared connection with seed data (people, posts tables + active_people view) and provides `CreateExecutor()` / `CreateMetadataQueryService()` methods.
