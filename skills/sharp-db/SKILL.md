@@ -1,7 +1,7 @@
 ---
 name: sharp-db
 description: Query databases (PostgreSQL, MySQL, SQLite) and inspect schema metadata. Use when the user wants to run SQL queries, list tables/views, or inspect table columns against any database. Requires building the project first and the user to provide a database type and connection string.
-tools: Bash, Read, Glob
+license: MIT
 ---
 
 # Sharp-DB
@@ -20,8 +20,7 @@ You should have dotnet sdk 10.0.x installed. if `dotnet` does not exist on syste
 Build the tool once before first use:
 
 ```bash
-git clone https://github.com/beginor/sharp-db.git
-cd sharp-db
+cd scripts
 dotnet publish src/SharpDb/SharpDb.csproj \
   --self-contained \
   --configuration Release \
