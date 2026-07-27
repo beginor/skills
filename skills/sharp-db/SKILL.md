@@ -21,16 +21,7 @@ You should have dotnet sdk 10.0.x installed. if `dotnet` does not exist on syste
 Build the tool once before first use:
 
 ```bash
-cd scripts
-dotnet publish src/SharpDb/SharpDb.csproj \
-  --self-contained \
-  --configuration Release \
-  -p:PublishSingleFile=true \
-  -p:IncludeNativeLibrariesForSelfExtract=true \
-  -p:PublishTrimmed=true \
-  -p:PublishReadyToRun=false \
-  -p:DebugType=None \
-  --output bin
+scripts/build.sh
 ```
 
 The binary is at `bin/sharp-db` (or `bin/sharp-db.exe` on windows).
