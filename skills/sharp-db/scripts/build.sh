@@ -7,7 +7,6 @@ dotnet publish src/SharpDb/SharpDb.csproj \
   --self-contained \
   --configuration Release \
   -p:PublishSingleFile=true \
-  -p:IncludeNativeLibrariesForSelfExtract=true \
   -p:PublishTrimmed=true \
   -p:PublishReadyToRun=false \
   -p:DebugType=None \
