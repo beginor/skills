@@ -12,22 +12,23 @@ A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLi
 
 ## Installation
 
-### Install skills
+### Via skills CLI (recommended)
 
 ```bash
-npx skills add beginor/sharp-db
+npx skills add beginor/agent-skills --skill sharp-db
 ```
 
-### Source code
+### From source
 
+Prerequisites: .NET 10 SDK.
 
 ```bash
-git clone https://github.com/beginor/sharp-db
-cd sharp-db
-dotnet build src/SharpDb/SharpDb.csproj
+git clone https://github.com/beginor/agent-skills.git
+cd agent-skills/skills/sharp-db/
+./scripts/build.sh
 ```
 
-The binary is at `src/SharpDb/bin/Debug/net10.0/sharp-db`.
+The binary is at `bin/sharp-db` (or `bin/sharp-db.exe` on Windows).
 
 ## Usage
 
