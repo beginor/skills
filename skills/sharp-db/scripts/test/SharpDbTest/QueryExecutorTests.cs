@@ -118,11 +118,11 @@ public sealed class QueryExecutorTests {
 
         Assert.That(markdown, Is.EqualTo(
             """
-            | table_schema | table_name | column_name | ordinal_position | data_type | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
-            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-            | main | posts | id | 1 | INTEGER | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
-            | main | posts | person_id | 2 | INTEGER | NO | NULL | NULL | NO | YES | main | people | id |
-            | main | posts | title | 3 | TEXT | NO | NULL | NULL | NO | NO | NULL | NULL | NULL |
+            | table_schema | table_name | column_name | ordinal_position | data_type | character_maximum_length | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
+            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+            | main | posts | id | 1 | INTEGER | NULL | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
+            | main | posts | person_id | 2 | INTEGER | NULL | NO | NULL | NULL | NO | YES | main | people | id |
+            | main | posts | title | 3 | TEXT | NULL | NO | NULL | NULL | NO | NO | NULL | NULL | NULL |
             """
         ));
     }
@@ -148,10 +148,10 @@ public sealed class QueryExecutorTests {
 
         Assert.That(markdown, Is.EqualTo(
             """
-            | table_schema | table_name | column_name | ordinal_position | data_type | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
-            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-            | main | implicit_ids | id | 1 | INTEGER | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
-            | main | implicit_ids | label | 2 | TEXT | YES | NULL | NULL | NO | NO | NULL | NULL | NULL |
+            | table_schema | table_name | column_name | ordinal_position | data_type | character_maximum_length | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
+            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+            | main | implicit_ids | id | 1 | INTEGER | NULL | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
+            | main | implicit_ids | label | 2 | TEXT | NULL | YES | NULL | NULL | NO | NO | NULL | NULL | NULL |
             """
         ));
     }

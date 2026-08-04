@@ -55,6 +55,7 @@ internal sealed class MySQLMetadataProvider(
                    columns.column_name as column_name,
                    columns.ordinal_position as ordinal_position,
                    columns.data_type as data_type,
+                   case when columns.data_type in ('char', 'varchar') then columns.character_maximum_length end as character_maximum_length,
                    columns.is_nullable as is_nullable,
                    columns.column_default as column_default,
                    nullif(columns.column_comment, '') as column_description,

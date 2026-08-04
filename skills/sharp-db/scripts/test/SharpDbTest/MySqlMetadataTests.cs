@@ -41,12 +41,12 @@ public sealed class MySqlMetadataTests {
 
         Assert.That(markdown, Is.EqualTo(
             $"""
-            | table_schema | table_name | column_name | ordinal_position | data_type | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
-            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-            | {database.SchemaName} | {database.ChildTableName} | child_id | 1 | int | NO | NULL | child identifier | YES | NO | NULL | NULL | NULL |
-            | {database.SchemaName} | {database.ChildTableName} | child_region | 2 | int | NO | NULL | NULL | NO | YES | {database.SchemaName} | {database.ParentTableName} | region_id |
-            | {database.SchemaName} | {database.ChildTableName} | child_code | 3 | varchar | NO | NULL | NULL | NO | YES | {database.SchemaName} | {database.ParentTableName} | code |
-            | {database.SchemaName} | {database.ChildTableName} | note | 4 | text | YES | NULL | child note | NO | NO | NULL | NULL | NULL |
+            | table_schema | table_name | column_name | ordinal_position | data_type | character_maximum_length | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
+            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+            | {database.SchemaName} | {database.ChildTableName} | child_id | 1 | int | NULL | NO | NULL | child identifier | YES | NO | NULL | NULL | NULL |
+            | {database.SchemaName} | {database.ChildTableName} | child_region | 2 | int | NULL | NO | NULL | NULL | NO | YES | {database.SchemaName} | {database.ParentTableName} | region_id |
+            | {database.SchemaName} | {database.ChildTableName} | child_code | 3 | varchar | 32 | NO | NULL | NULL | NO | YES | {database.SchemaName} | {database.ParentTableName} | code |
+            | {database.SchemaName} | {database.ChildTableName} | note | 4 | text | NULL | YES | NULL | child note | NO | NO | NULL | NULL | NULL |
             """
         ));
     }

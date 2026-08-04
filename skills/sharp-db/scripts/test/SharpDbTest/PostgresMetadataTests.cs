@@ -43,12 +43,13 @@ public sealed class PostgresMetadataTests {
 
         Assert.That(markdown, Is.EqualTo(
             $"""
-            | table_schema | table_name | column_name | ordinal_position | data_type | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
-            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-            | {database.SchemaName} | child_records | child_id | 1 | integer | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
-            | {database.SchemaName} | child_records | child_region | 2 | integer | NO | NULL | NULL | NO | YES | {database.SchemaName} | parent_records | region_id |
-            | {database.SchemaName} | child_records | child_code | 3 | text | NO | NULL | NULL | NO | YES | {database.SchemaName} | parent_records | code |
-            | {database.SchemaName} | child_records | note | 4 | text | YES | NULL | NULL | NO | NO | NULL | NULL | NULL |
+            | table_schema | table_name | column_name | ordinal_position | data_type | character_maximum_length | is_nullable | column_default | column_description | is_primary_key | is_foreign_key | referenced_table_schema | referenced_table_name | referenced_column_name |
+            | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+            | {database.SchemaName} | child_records | child_id | 1 | integer | NULL | NO | NULL | NULL | YES | NO | NULL | NULL | NULL |
+            | {database.SchemaName} | child_records | child_region | 2 | integer | NULL | NO | NULL | NULL | NO | YES | {database.SchemaName} | parent_records | region_id |
+            | {database.SchemaName} | child_records | child_code | 3 | text | NULL | NO | NULL | NULL | NO | YES | {database.SchemaName} | parent_records | code |
+            | {database.SchemaName} | child_records | note | 4 | text | NULL | YES | NULL | NULL | NO | NO | NULL | NULL | NULL |
+            | {database.SchemaName} | child_records | tags | 5 | ARRAY | 12 | YES | NULL | NULL | NO | NO | NULL | NULL | NULL |
             """
         ));
     }
@@ -93,6 +94,7 @@ public sealed class PostgresMetadataTests {
                     child_region integer not null,
                     child_code text not null,
                     note text null,
+                    tags varchar(12)[] null,
                     constraint child_records_pkey primary key (child_id),
                     constraint child_records_parent_records_fkey
                         foreign key (child_region, child_code)

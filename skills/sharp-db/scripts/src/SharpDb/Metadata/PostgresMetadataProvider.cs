@@ -137,6 +137,16 @@ internal sealed class PostgresMetadataProvider(
                    columns.column_name,
                    columns.ordinal_position,
                    columns.data_type,
+                   case
+                       when columns.data_type = 'ARRAY' then
+                           (
+                               select (regexp_match(
+                                   format_type(attributes.atttypid, attributes.atttypmod),
+                                   '\((\d+)\)'
+                               ))[1]::int
+                           )
+                       else columns.character_maximum_length
+                   end as character_maximum_length,
                    columns.is_nullable,
                    columns.column_default,
                    col_description(classes.oid, attributes.attnum) as column_description,

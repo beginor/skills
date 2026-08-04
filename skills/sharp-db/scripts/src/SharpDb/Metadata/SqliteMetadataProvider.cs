@@ -54,6 +54,16 @@ internal sealed class SqliteMetadataProvider(
                    table_info.cid + 1 as ordinal_position,
                    table_info.type as data_type,
                    case
+                       when upper(table_info.type) like '%CHAR%' and instr(table_info.type, '(') > 0 then
+                           cast(
+                               substr(
+                                   table_info.type,
+                                   instr(table_info.type, '(') + 1,
+                                   instr(table_info.type, ')') - instr(table_info.type, '(') - 1
+                               ) as integer
+                           )
+                   end as character_maximum_length,
+                   case
                        when table_info.pk > 0 then 'NO'
                        when table_info."notnull" = 0 then 'YES'
                        else 'NO'
