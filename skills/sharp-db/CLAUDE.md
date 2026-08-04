@@ -23,9 +23,9 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 - **`QueryExecutor.cs`** — Executes arbitrary SQL and returns results as markdown tables. Non-SELECT statements return `Rows affected: N`.
 - **`MetadataQueryService.cs`** — Delegates to the appropriate `IMetadataProvider` via `MetadataProviderFactory`.
 - **`Metadata/`** — Provider pattern for schema introspection:
-  - `IMetadataProvider` — interface with `QueryTablesAsync` and `QueryColumnsAsync`.
+  - `IMetadataProvider` — interface with `QueryTablesAsync` and `QueryColumnsAsync`. Column metadata includes `character_maximum_length` for string types (char/varchar).
   - `BaseMetadataProvider` — abstract base sharing connection management, parameter binding, and result formatting. Subclasses only supply SQL queries.
-  - `PostgresMetadataProvider`, `MySQLMetadataProvider`, `SqliteMetadataProvider` — concrete implementations with database-specific SQL.
+  - `PostgresMetadataProvider`, `MySQLMetadataProvider`, `SqliteMetadataProvider` — concrete implementations with database-specific SQL. Postgres provider also extracts `varchar[]` array element lengths.
   - `MetadataProviderFactory` — selects provider by `dbType`.
 - **`DbConnectionFactory.cs`** — Factory creating ADO.NET `DbConnection` instances (Npgsql, MySql.Data, Sqlite).
 - **`MarkdownTableFormatter.cs`** — Converts `DbDataReader` to GitHub-flavored markdown tables with proper escaping.

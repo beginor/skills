@@ -52,7 +52,7 @@ If `--schema` is omitted and the database supports schemas, returns tables from 
 
 ### columns — Inspect table columns
 
-List columns for a specific table or view, including data types, constraints, nullability, and foreign key references.
+List columns for a specific table or view, including data types, **character maximum length** (for char/varchar types), constraints, nullability, and foreign key references.
 
 ```bash
 sharp-db columns --db-type <postgres|mysql|sqlite> --connection "<conn-string>" --table <name> [--schema <name>]
@@ -130,3 +130,4 @@ sharp-db query --db-type postgres --connection "host=localhost;port=5432;databas
 - SQLite uses in-memory databases when `Data Source=:memory:` is specified; each connection creates a new database.
 - PostgreSQL and MySQL queries include table descriptions (comments) when available.
 - Foreign key information includes the referenced table and column for easy relationship tracing.
+- The `columns` command includes a `character_maximum_length` column for string types (`char`/`varchar`). PostgreSQL also supports `varchar[]` array element length extraction. Non-string types show `NULL`.

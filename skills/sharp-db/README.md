@@ -6,7 +6,7 @@ A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLi
 
 - **Execute SQL queries** and get results as markdown tables
 - **List tables and views** with primary keys, foreign keys, and descriptions
-- **Inspect table columns** with data types, constraints, and foreign key references
+- **Inspect table columns** with data types, character maximum length (for char/varchar), constraints, and foreign key references
 - **Multi-database support**: PostgreSQL, MySQL, SQLite
 - **Schema-aware**: Optional schema filtering for databases that support schemas
 
@@ -107,7 +107,7 @@ dotnet test
 ### Project structure
 
 ```
-src/SharpDb/
+scripts/src/SharpDb/
 ├── Metadata/
 │   ├── IMetadataProvider.cs         # Provider interface
 │   ├── BaseMetadataProvider.cs      # Shared execution logic
@@ -122,7 +122,7 @@ src/SharpDb/
 ├── Program.cs                       # CLI entry point
 └── QueryExecutor.cs                 # SQL execution
 
-test/SharpDbTest/
+scripts/test/SharpDbTest/
 └── QueryExecutorTests.cs            # Tests (SQLite in-memory)
 ```
 
