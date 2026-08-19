@@ -8,6 +8,7 @@ public static class MarkdownTableFormatter {
 
     public static async Task<string> FormatAsync(
         DbDataReader reader,
+        int? maxRows = null,
         CancellationToken cancellationToken = default
     ) {
         var columnCount = reader.FieldCount;
@@ -20,15 +21,24 @@ public static class MarkdownTableFormatter {
         AppendRow(builder, GetColumnNames(reader, columnCount));
         AppendSeparator(builder, columnCount);
 
-        var hasRows = false;
+        var rowCount = 0;
+        var truncated = false;
         while (await reader.ReadAsync(cancellationToken)) {
-            hasRows = true;
+            if (maxRows is not null && rowCount == maxRows) {
+                truncated = true;
+                break;
+            }
+            rowCount++;
             AppendRow(builder, GetValues(reader, columnCount));
         }
 
-        if (!hasRows) {
+        if (rowCount == 0) {
             builder.AppendLine();
             builder.Append("_No rows returned._");
+        }
+        else if (truncated) {
+            builder.AppendLine();
+            builder.Append($"_Showing first {maxRows} rows; result truncated._");
         }
 
         return builder.ToString().TrimEnd();

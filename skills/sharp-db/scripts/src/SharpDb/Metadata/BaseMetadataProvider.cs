@@ -56,7 +56,7 @@ public abstract class BaseMetadataProvider(
         }
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
-        return await MarkdownTableFormatter.FormatAsync(reader, cancellationToken);
+        return await MarkdownTableFormatter.FormatAsync(reader, null, cancellationToken);
     }
 
 }

@@ -19,8 +19,8 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 
 ### Core modules (`scripts/src/SharpDb/`)
 
-- **`Program.cs`** — CLI entry point with three commands: `query`, `tables`, `columns`. Argument parsing is manual (no framework).
-- **`QueryExecutor.cs`** — Executes arbitrary SQL and returns results as markdown tables. Non-SELECT statements return `Rows affected: N`.
+- **`Program.cs`** — CLI entry point with four commands: `query`, `tables`, `columns`, `execute`. Argument parsing is manual (no framework). Shared flags: `--connection` / `--connection-env <VAR>` (mutually exclusive, read from the environment), and for `execute` a valueless `--yes` to skip interactive confirmation (required in non-terminal contexts). `query` takes `--limit <n>` (default 100, `0` disables).
+- **`QueryExecutor.cs`** — Executes arbitrary SQL and returns results as markdown tables, honoring a row limit with a truncation notice. Non-SELECT statements return `Rows affected: N`. `ExecuteFileAsync` runs the file as a single batch within a transaction (all providers, including SQLite, execute multi-statement batches natively).
 - **`MetadataQueryService.cs`** — Delegates to the appropriate `IMetadataProvider` via `MetadataProviderFactory`.
 - **`Metadata/`** — Provider pattern for schema introspection:
   - `IMetadataProvider` — interface with `QueryTablesAsync` and `QueryColumnsAsync`. Column metadata includes `character_maximum_length` for string types (char/varchar).

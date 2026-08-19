@@ -1,9 +1,12 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 
 namespace Beginor.SharpDb;
 
 public static class Program {
+
+    private const string DefaultRowLimit = "100";
 
     public static async Task<int> Main(string[] args) {
         if (args.Length == 0 || args[0] is "--help" or "-h") {
@@ -46,10 +49,13 @@ public static class Program {
         sb.AppendLine("Options:");
         sb.AppendLine("  --db-type <type>       Database type: postgres, mysql, sqlite (required)");
         sb.AppendLine("  --connection <string>  ADO.NET connection string (required)");
+        sb.AppendLine("  --connection-env <name>  Read the connection string from the named environment variable");
         sb.AppendLine("  --sql <statement>      SQL to execute (required for 'query')");
         sb.AppendLine("  --file <path>          SQL file to execute (required for 'execute')");
         sb.AppendLine("  --table <name>         Table or view name (required for 'columns')");
         sb.AppendLine("  --schema <name>        Optional schema name");
+        sb.AppendLine($"  --limit <n>          Max rows to return for 'query' (default {DefaultRowLimit}, 0 disables)");
+        sb.AppendLine("  --yes                  Skip confirmation (execute only)");
         sb.AppendLine("  --help, -h             Show this help message");
         sb.AppendLine("  --version, -v          Show version");
         Console.Out.Write(sb);
@@ -68,23 +74,24 @@ public static class Program {
     }
 
     private static async Task<int> RunQueryAsync(string[] args) {
-        ValidateOptions(args, "--db-type", "--connection", "--sql");
+        ValidateOptions(args, new[] { "--db-type", "--connection", "--connection-env", "--sql", "--limit" });
 
         var dbType = Require(args, "--db-type");
-        var connStr = Require(args, "--connection");
+        var connStr = ResolveConnectionString(args);
         var sql = Require(args, "--sql");
+        var rowLimit = ResolveRowLimit(args);
 
         var executor = CreateExecutor();
-        var result = await executor.ExecuteQueryAsync(dbType, connStr, sql);
+        var result = await executor.ExecuteQueryAsync(dbType, connStr, sql, rowLimit);
         Console.Out.WriteLine(result);
         return 0;
     }
 
     private static async Task<int> RunTablesAsync(string[] args) {
-        ValidateOptions(args, "--db-type", "--connection", "--schema");
+        ValidateOptions(args, new[] { "--db-type", "--connection", "--connection-env", "--schema" });
 
         var dbType = Require(args, "--db-type");
-        var connStr = Require(args, "--connection");
+        var connStr = ResolveConnectionString(args);
         var schema = Optional(args, "--schema");
 
         var metadata = CreateMetadataService();
@@ -94,11 +101,12 @@ public static class Program {
     }
 
     private static async Task<int> RunExecuteAsync(string[] args) {
-        ValidateOptions(args, "--db-type", "--connection", "--file");
+        ValidateOptions(args, new[] { "--db-type", "--connection", "--connection-env", "--file", "--yes" }, "--yes");
 
         var dbType = Require(args, "--db-type");
-        var connStr = Require(args, "--connection");
+        var connStr = ResolveConnectionString(args);
         var filePath = Require(args, "--file");
+        var autoConfirm = HasFlag(args, "--yes");
 
         if (!File.Exists(filePath)) {
             return Fail($"SQL file not found: {filePath}");
@@ -109,16 +117,18 @@ public static class Program {
         Console.Out.WriteLine($"SQL file: {filePath}");
         Console.Out.WriteLine($"Database: {dbType}");
 
-        if (Console.IsInputRedirected) {
-            return Fail("Interactive confirmation required. stdin is redirected.");
-        }
+        if (!autoConfirm) {
+            if (Console.IsInputRedirected) {
+                return Fail("Interactive confirmation required. Use --yes to run non-interactively.");
+            }
 
-        Console.Out.Write("Execute? [y/N] ");
-        var input = (await Console.In.ReadLineAsync())?.Trim().ToLowerInvariant();
+            Console.Out.Write("Execute? [y/N] ");
+            var input = (await Console.In.ReadLineAsync())?.Trim().ToLowerInvariant();
 
-        if (input != "y" && input != "yes") {
-            Console.Out.WriteLine("Aborted.");
-            return 0;
+            if (input != "y" && input != "yes") {
+                Console.Out.WriteLine("Aborted.");
+                return 0;
+            }
         }
 
         var executor = CreateExecutor();
@@ -128,10 +138,10 @@ public static class Program {
     }
 
     private static async Task<int> RunColumnsAsync(string[] args) {
-        ValidateOptions(args, "--db-type", "--connection", "--table", "--schema");
+        ValidateOptions(args, new[] { "--db-type", "--connection", "--connection-env", "--table", "--schema" });
 
         var dbType = Require(args, "--db-type");
-        var connStr = Require(args, "--connection");
+        var connStr = ResolveConnectionString(args);
         var tableName = Require(args, "--table");
         var schema = Optional(args, "--schema");
 
@@ -139,6 +149,34 @@ public static class Program {
         var result = await metadata.QueryColumnsAsync(dbType, connStr, tableName, schema);
         Console.Out.WriteLine(result);
         return 0;
+    }
+
+    private static string ResolveConnectionString(string[] args) {
+        if (HasFlag(args, "--connection") || HasFlag(args, "--connection-env")) {
+            if (HasFlag(args, "--connection") && HasFlag(args, "--connection-env")) {
+                throw new ArgumentException("Use either --connection or --connection-env, not both.");
+            }
+
+            if (HasFlag(args, "--connection-env")) {
+                var varName = Require(args, "--connection-env");
+                var value = Environment.GetEnvironmentVariable(varName);
+                if (string.IsNullOrWhiteSpace(value)) {
+                    throw new ArgumentException($"Environment variable '{varName}' is not set or empty.");
+                }
+                return value;
+            }
+        }
+
+        return Require(args, "--connection");
+    }
+
+    private static int? ResolveRowLimit(string[] args) {
+        var limit = Optional(args, "--limit") ?? DefaultRowLimit;
+        if (!int.TryParse(limit, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) || value < 0) {
+            throw new ArgumentException($"--limit must be a non-negative integer, got '{limit}'.");
+        }
+
+        return value == 0 ? null : value;
     }
 
     private static string Require(string[] args, string flag) {
@@ -167,8 +205,12 @@ public static class Program {
         return null;
     }
 
-    private static void ValidateOptions(string[] args, params string[] allowedFlags) {
+    private static bool HasFlag(string[] args, string flag) =>
+        args.Contains(flag, StringComparer.Ordinal);
+
+    private static void ValidateOptions(string[] args, string[] allowedFlags, params string[] valuelessFlags) {
         var allowed = new HashSet<string>(allowedFlags, StringComparer.Ordinal);
+        var valueless = new HashSet<string>(valuelessFlags, StringComparer.Ordinal);
         for (var i = 0; i < args.Length; i++) {
             var arg = args[i];
             if (!IsFlag(arg)) {
@@ -177,6 +219,10 @@ public static class Program {
 
             if (!allowed.Contains(arg)) {
                 throw new ArgumentException($"Unknown argument: {arg}");
+            }
+
+            if (valueless.Contains(arg)) {
+                continue;
             }
 
             if (i == args.Length - 1 || IsFlag(args[i + 1])) {

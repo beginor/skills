@@ -4,9 +4,11 @@ A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLi
 
 ## Features
 
-- **Execute SQL queries** and get results as markdown tables
+- **Execute SQL queries** and get results as markdown tables (capped by `--limit` to avoid huge outputs)
 - **List tables and views** with primary keys, foreign keys, and descriptions
 - **Inspect table columns** with data types, character maximum length (for char/varchar), constraints, and foreign key references
+- **Run SQL files** in a transaction, non-interactively with `--yes` (multi-statement files run as a batch)
+- **Connection from environment**: pass credentials via `--connection-env <VAR>` to keep them out of the command line
 - **Multi-database support**: PostgreSQL, MySQL, SQLite
 - **Schema-aware**: Optional schema filtering for databases that support schemas
 
@@ -38,6 +40,8 @@ The binary is at `bin/sharp-db` (or `bin/sharp-db.exe` on Windows).
 sharp-db query --db-type postgres --connection "host=localhost;port=5432;database=mydb;username=postgres;password=pass" --sql "SELECT id, name FROM users"
 ```
 
+`--limit N` caps the returned rows (default `100`); a capped result appends a truncation notice. Use `--limit 0` to disable the cap. The connection string can also come from an environment variable via `--connection-env <VAR>` (mutually exclusive with `--connection`).
+
 ### Tables — List tables and views
 
 ```bash
@@ -64,13 +68,13 @@ sharp-db columns --db-type postgres --connection "..." --table users --schema pu
 
 ### Execute — Run a SQL file
 
-Execute a SQL file within a transaction. Requires interactive confirmation before running. Rolls back on error.
+Execute a SQL file within a transaction. Rolls back on error.
 
 ```bash
-sharp-db execute --db-type postgres --connection "..." --file migrate.sql
+sharp-db execute --db-type postgres --connection "..." --file migrate.sql [--yes]
 ```
 
-The tool prompts `Execute? [y/N]` before running. Only `y` or `yes` proceeds; anything else aborts. stdin must be a terminal (redirected stdin is rejected for safety).
+Without `--yes`, the tool prompts `Execute? [y/N]` and requires an interactive terminal (redirected stdin is rejected). Pass `--yes` to run non-interactively (e.g. in scripts or CI). Multi-statement files run as a single batch on all three databases.
 
 ## As a Claude Code Skill
 

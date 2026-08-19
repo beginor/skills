@@ -1,5 +1,5 @@
-using System.Globalization;
 using System.Data.Common;
+using System.Globalization;
 
 namespace Beginor.SharpDb;
 
@@ -11,6 +11,7 @@ public sealed class QueryExecutor(
         string dbType,
         string connectionString,
         string sql,
+        int? maxRows = null,
         CancellationToken cancellationToken = default
     ) {
         if (string.IsNullOrWhiteSpace(sql)) {
@@ -28,7 +29,7 @@ public sealed class QueryExecutor(
             return FormatRowsAffected(reader.RecordsAffected);
         }
 
-        return await MarkdownTableFormatter.FormatAsync(reader, cancellationToken);
+        return await MarkdownTableFormatter.FormatAsync(reader, maxRows, cancellationToken);
     }
 
     public async Task<string> ExecuteFileAsync(

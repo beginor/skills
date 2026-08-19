@@ -200,6 +200,73 @@ public sealed class QueryExecutorTests {
     }
 
     [Test]
+    public async Task ExecuteFileAsync_RunsMultiStatementSqliteFile() {
+        // Microsoft.Data.Sqlite executes the whole batch; guard against a driver
+        // regression that would silently drop every statement after the first.
+        await using var database = await InMemorySqliteDatabase.CreateAsync();
+        var executor = database.CreateExecutor();
+
+        var sql = """
+            create table multi_one (id integer primary key);
+            create table multi_two (id integer primary key);
+            insert into multi_one (id) values (1), (2);
+            """;
+
+        await executor.ExecuteFileAsync(database.DbType, database.ConnectionString, sql);
+
+        var tables = await executor.ExecuteQueryAsync(
+            database.DbType,
+            database.ConnectionString,
+            "select name from sqlite_master where type = 'table' and name like 'multi%' order by name"
+        );
+        Assert.Multiple(() => {
+            Assert.That(tables, Does.Contain("multi_one"));
+            Assert.That(tables, Does.Contain("multi_two"));
+        });
+    }
+
+    [Test]
+    public async Task ExecuteQueryAsync_LimitsReturnedRows() {
+        await using var database = await InMemorySqliteDatabase.CreateAsync();
+        var executor = database.CreateExecutor();
+
+        var markdown = await executor.ExecuteQueryAsync(
+            database.DbType,
+            database.ConnectionString,
+            // language=none
+            "select id, name from people order by id",
+            maxRows: 1
+        );
+
+        Assert.That(markdown, Is.EqualTo(
+            """
+            | id | name |
+            | --- | --- |
+            | 1 | Ada |
+
+            _Showing first 1 rows; result truncated._
+            """
+        ));
+    }
+
+    [Test]
+    public async Task ExecuteQueryAsync_ReturnsAllRowsWithoutLimit() {
+        await using var database = await InMemorySqliteDatabase.CreateAsync();
+        var executor = database.CreateExecutor();
+
+        var markdown = await executor.ExecuteQueryAsync(
+            database.DbType,
+            database.ConnectionString,
+            // language=none
+            "select id, name from people order by id",
+            maxRows: null
+        );
+
+        Assert.That(markdown, Does.Not.Contain("truncated"));
+        Assert.That(markdown, Does.Contain("Grace \\| Hopper"));
+    }
+
+    [Test]
     public async Task ExecuteFileAsync_RejectsEmptySql() {
         await using var database = await InMemorySqliteDatabase.CreateAsync();
         var executor = database.CreateExecutor();
@@ -216,6 +283,48 @@ public sealed class QueryExecutorTests {
         Assert.Multiple(() => {
             Assert.That(exitCode, Is.EqualTo(1));
             Assert.That(error, Does.Contain("Missing value for argument: --db-type"));
+        });
+    }
+
+    [Test]
+    public async Task Main_UsesConnectionFromEnvironmentVariable() {
+        const string variableName = "SHARP_DB_TEST_CONNECTION";
+        Environment.SetEnvironmentVariable(variableName, "Data Source=:memory:");
+        try {
+            var (exitCode, output, _) = await RunProgramCapturingOut(
+                "query",
+                "--db-type",
+                "sqlite",
+                "--connection-env",
+                variableName,
+                "--sql",
+                "select 1 as one"
+            );
+
+            Assert.Multiple(() => {
+                Assert.That(exitCode, Is.EqualTo(0));
+                Assert.That(output, Does.Contain("| 1 |"));
+            });
+        } finally {
+            Environment.SetEnvironmentVariable(variableName, null);
+        }
+    }
+
+    [Test]
+    public async Task Main_FailsWhenConnectionVariableIsNotSet() {
+        var (exitCode, error) = await RunProgramAsync(
+            "query",
+            "--db-type",
+            "sqlite",
+            "--connection-env",
+            "SHARP_DB_UNSET_VARIABLE",
+            "--sql",
+            "select 1"
+        );
+
+        Assert.Multiple(() => {
+            Assert.That(exitCode, Is.EqualTo(1));
+            Assert.That(error, Does.Contain("Environment variable 'SHARP_DB_UNSET_VARIABLE' is not set or empty."));
         });
     }
 
@@ -358,14 +467,23 @@ public sealed class QueryExecutorTests {
     }
 
     private static async Task<(int ExitCode, string Error)> RunProgramAsync(params string[] args) {
+        var (exitCode, _, error) = await RunProgramCapturingOut(args);
+        return (exitCode, error);
+    }
+
+    private static async Task<(int ExitCode, string Output, string Error)> RunProgramCapturingOut(params string[] args) {
+        var originalOut = Console.Out;
         var originalError = Console.Error;
+        using var output = new StringWriter();
         using var error = new StringWriter();
 
         try {
+            Console.SetOut(output);
             Console.SetError(error);
             var exitCode = await Program.Main(args);
-            return (exitCode, error.ToString());
+            return (exitCode, output.ToString(), error.ToString());
         } finally {
+            Console.SetOut(originalOut);
             Console.SetError(originalError);
         }
     }
