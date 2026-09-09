@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-09
+
+- **sharp-db**
+  - 新增 SQL Server 支持（`--db-type sqlserver`，别名 `mssql`），基于 Microsoft.Data.SqlClient；`tables` / `columns` 支持主键、外键、关联对象、表/列描述及字符串类型长度
+  - 新增 SQL Server 复合外键集成测试（`SHARP_DB_SQLSERVER_CONNECTION_STRING` 环境变量，未设置时跳过）
+  - 升级 NuGet 包版本：Microsoft.Data.SqlClient 7.0.2、Microsoft.NET.Test.Sdk 18.9.0、Microsoft.Data.Sqlite 10.0.11、MySql.Data 26.7.0、NUnit3TestAdapter 6.3.0
+  - 文档同步：README / SKILL.md / CLAUDE.md 更新支持列表与 SQL Server 连接串示例
+
 ## 2026-08-19
 
 - **sharp-db**
