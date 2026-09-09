@@ -47,7 +47,7 @@ public static class Program {
         sb.AppendLine("  execute   Execute a SQL file within a transaction (requires confirmation)");
         sb.AppendLine();
         sb.AppendLine("Options:");
-        sb.AppendLine("  --db-type <type>       Database type: postgres, mysql, sqlite (required)");
+        sb.AppendLine("  --db-type <type>       Database type: postgres, mysql, sqlite, sqlserver (required)");
         sb.AppendLine("  --connection <string>  ADO.NET connection string (required)");
         sb.AppendLine("  --connection-env <name>  Read the connection string from the named environment variable");
         sb.AppendLine("  --sql <statement>      SQL to execute (required for 'query')");

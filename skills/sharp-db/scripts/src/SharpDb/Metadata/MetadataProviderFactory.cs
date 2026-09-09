@@ -7,8 +7,9 @@ internal static class MetadataProviderFactory {
             "postgres" or "postgresql" => new PostgresMetadataProvider(connectionFactory, options),
             "mysql"                    => new MySQLMetadataProvider(connectionFactory, options),
             "sqlite"                   => new SqliteMetadataProvider(connectionFactory, options),
+            "sqlserver" or "mssql"     => new SqlServerMetadataProvider(connectionFactory, options),
             _                          => throw new NotSupportedException(
-                $"Unsupported dbType '{options.Type}'. Supported values are postgres, mysql, sqlite.")
+                $"Unsupported dbType '{options.Type}'. Supported values are postgres, mysql, sqlite, sqlserver.")
         };
     }
 

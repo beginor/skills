@@ -1,4 +1,5 @@
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySql.Data.MySqlClient;
 using Npgsql;
@@ -18,8 +19,9 @@ public sealed class DbConnectionFactory : IDbConnectionFactory {
             "postgres" or "postgresql" => new NpgsqlConnection(options.ConnectionString),
             "mysql" => new MySqlConnection(options.ConnectionString),
             "sqlite" => new SqliteConnection(options.ConnectionString),
+            "sqlserver" or "mssql" => new SqlConnection(options.ConnectionString),
             _ => throw new NotSupportedException(
-                $"Unsupported dbType '{options.Type}'. Supported values are postgres, mysql, sqlite."
+                $"Unsupported dbType '{options.Type}'. Supported values are postgres, mysql, sqlite, sqlserver."
             )
         };
     }

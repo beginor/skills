@@ -1,6 +1,6 @@
 # Sharp-DB
 
-A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLite) and inspecting schema metadata.
+A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLite, SQL Server) and inspecting schema metadata.
 
 ## Features
 
@@ -9,7 +9,7 @@ A CLI tool and Claude Code Skill for querying databases (PostgreSQL, MySQL, SQLi
 - **Inspect table columns** with data types, character maximum length (for char/varchar), constraints, and foreign key references
 - **Run SQL files** in a transaction, non-interactively with `--yes` (multi-statement files run as a batch)
 - **Connection from environment**: pass credentials via `--connection-env <VAR>` to keep them out of the command line
-- **Multi-database support**: PostgreSQL, MySQL, SQLite
+- **Multi-database support**: PostgreSQL, MySQL, SQLite, SQL Server
 - **Schema-aware**: Optional schema filtering for databases that support schemas
 
 ## Installation
@@ -74,7 +74,7 @@ Execute a SQL file within a transaction. Rolls back on error.
 sharp-db execute --db-type postgres --connection "..." --file migrate.sql [--yes]
 ```
 
-Without `--yes`, the tool prompts `Execute? [y/N]` and requires an interactive terminal (redirected stdin is rejected). Pass `--yes` to run non-interactively (e.g. in scripts or CI). Multi-statement files run as a single batch on all three databases.
+Without `--yes`, the tool prompts `Execute? [y/N]` and requires an interactive terminal (redirected stdin is rejected). Pass `--yes` to run non-interactively (e.g. in scripts or CI). Multi-statement files run as a single batch on all four databases.
 
 ## As a Claude Code Skill
 
@@ -92,6 +92,7 @@ This project includes a Skill at `.claude/skills/sharp-db/SKILL.md`. When workin
 |----------|--------|---------------------------|
 | PostgreSQL | Npgsql | `host=localhost;port=5432;database=mydb;username=postgres;password=pass` |
 | MySQL | MySql.Data | `server=localhost;port=3306;database=mydb;user=root;password=pass` |
+| SQL Server | Microsoft.Data.SqlClient | `server=localhost,1433;database=mydb;user id=sa;password=pass;TrustServerCertificate=True` |
 | SQLite | Microsoft.Data.Sqlite | `Data Source=/path/to/db.sqlite` |
 
 ## Development
@@ -118,6 +119,7 @@ scripts/src/SharpDb/
 │   ├── PostgresMetadataProvider.cs  # PostgreSQL SQL
 │   ├── MySQLMetadataProvider.cs     # MySQL SQL
 │   ├── SqliteMetadataProvider.cs    # SQLite SQL
+│   ├── SqlServerMetadataProvider.cs # SQL Server SQL
 │   └── MetadataProviderFactory.cs   # Factory by dbType
 ├── DatabaseOptions.cs               # Connection parameters
 ├── DbConnectionFactory.cs           # Connection creation

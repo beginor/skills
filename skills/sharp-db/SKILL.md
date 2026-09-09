@@ -1,13 +1,13 @@
 ---
 name: sharp-db
-description: Query databases (PostgreSQL, MySQL, SQLite) and inspect schema metadata. Use when the user wants to run SQL queries, list tables/views, or inspect table columns against any database. Runs non-interactively by inferring the database type and connection string from context; only ask the user when those cannot be determined.
+description: Query databases (PostgreSQL, MySQL, SQLite, SQL Server) and inspect schema metadata. Use when the user wants to run SQL queries, list tables/views, or inspect table columns against any database. Runs non-interactively by inferring the database type and connection string from context; only ask the user when those cannot be determined.
 compatibility: requires dotnet 10.0+ installed
 license: MIT
 ---
 
 # Sharp-DB
 
-A CLI tool for querying databases and inspecting schema metadata. Supports PostgreSQL, MySQL, and SQLite.
+A CLI tool for querying databases and inspecting schema metadata. Supports PostgreSQL, MySQL, SQLite, and SQL Server.
 
 ## Requirements
 
@@ -33,7 +33,7 @@ The binary is at `bin/sharp-db` (or `bin/sharp-db.exe` on windows).
 Run a SQL statement and return results as a markdown table.
 
 ```bash
-sharp-db query --db-type <postgres|mysql|sqlite> --connection "<conn-string>" --sql "<sql>" [--limit <n>]
+sharp-db query --db-type <postgres|mysql|sqlite|sqlserver> --connection "<conn-string>" --sql "<sql>" [--limit <n>]
 ```
 
 For non-SELECT statements (INSERT, UPDATE, DELETE), returns `Rows affected: N`.
@@ -47,7 +47,7 @@ For non-SELECT statements (INSERT, UPDATE, DELETE), returns `Rows affected: N`.
 List all tables and views with metadata (primary keys, foreign keys, descriptions, related objects).
 
 ```bash
-sharp-db tables --db-type <postgres|mysql|sqlite> --connection "<conn-string>" [--schema <name>]
+sharp-db tables --db-type <postgres|mysql|sqlite|sqlserver> --connection "<conn-string>" [--schema <name>]
 ```
 
 If `--schema` is omitted and the database supports schemas, returns tables from all schemas.
@@ -57,15 +57,15 @@ If `--schema` is omitted and the database supports schemas, returns tables from 
 List columns for a specific table or view, including data types, **character maximum length** (for char/varchar types), constraints, nullability, and foreign key references.
 
 ```bash
-sharp-db columns --db-type <postgres|mysql|sqlite> --connection "<conn-string>" --table <name> [--schema <name>]
+sharp-db columns --db-type <postgres|mysql|sqlite|sqlserver> --connection "<conn-string>" --table <name> [--schema <name>]
 ```
 
 ### execute — Execute a SQL file
 
-Execute a SQL file within a transaction. Rolls back on error. Multi-statement files are run as a single batch (all three providers support it natively).
+Execute a SQL file within a transaction. Rolls back on error. Multi-statement files are run as a single batch (all four providers support it natively).
 
 ```bash
-sharp-db execute --db-type <postgres|mysql|sqlite> --connection "<conn-string>" --file <path-to-sql-file> [--yes]
+sharp-db execute --db-type <postgres|mysql|sqlite|sqlserver> --connection "<conn-string>" --file <path-to-sql-file> [--yes]
 ```
 
 Without `--yes`, the tool prompts `Execute? [y/N]` and requires an interactive terminal (redirected stdin is rejected). **When running from Claude Code or any script, always pass `--yes`** so the command can run non-interactively — interactive prompts are impossible in that context.
@@ -79,6 +79,7 @@ Every command accepts the connection string via **`--connection "<string>"`** or
 | PostgreSQL | `host=localhost;port=5432;database=mydb;username=postgres;password=pass` |
 | PostgreSQL | `server=127.0.0.1;port=5432;database=test_db;user id=postgres;password=pgsql@18` |
 | MySQL | `server=localhost;port=3306;database=mydb;user=root;password=pass` |
+| SQL Server | `server=localhost,1433;database=mydb;user id=sa;password=pass;TrustServerCertificate=True` |
 | SQLite | `Data Source=/path/to/db.sqlite` |
 | SQLite | `Data Source=:memory:` |
 
@@ -142,6 +143,6 @@ sharp-db query --db-type postgres --connection "host=localhost;port=5432;databas
 
 - `query` caps results at 100 rows by default; the output ends with a truncation notice when the cap is hit. Use `--limit N` to change it or `--limit 0` to disable.
 - SQLite uses in-memory databases when `Data Source=:memory:` is specified; each connection creates a new database.
-- PostgreSQL and MySQL queries include table descriptions (comments) when available.
+- PostgreSQL, MySQL, and SQL Server queries include table descriptions (comments) when available.
 - Foreign key information includes the referenced table and column for easy relationship tracing.
 - The `columns` command includes a `character_maximum_length` column for string types (`char`/`varchar`). PostgreSQL also supports `varchar[]` array element length extraction. Non-string types show `NULL`.

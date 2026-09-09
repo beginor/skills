@@ -15,7 +15,7 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 
 ## Architecture
 
-**Sharp-DB** is a CLI tool and Claude Code Skill for querying PostgreSQL, MySQL, and SQLite databases.
+**Sharp-DB** is a CLI tool and Claude Code Skill for querying PostgreSQL, MySQL, SQLite, and SQL Server databases.
 
 ### Core modules (`scripts/src/SharpDb/`)
 
@@ -25,9 +25,9 @@ Single test via filter: `dotnet test --filter "FullyQualifiedName~<TestName>"` o
 - **`Metadata/`** — Provider pattern for schema introspection:
   - `IMetadataProvider` — interface with `QueryTablesAsync` and `QueryColumnsAsync`. Column metadata includes `character_maximum_length` for string types (char/varchar).
   - `BaseMetadataProvider` — abstract base sharing connection management, parameter binding, and result formatting. Subclasses only supply SQL queries.
-  - `PostgresMetadataProvider`, `MySQLMetadataProvider`, `SqliteMetadataProvider` — concrete implementations with database-specific SQL. Postgres provider also extracts `varchar[]` array element lengths.
+  - `PostgresMetadataProvider`, `MySQLMetadataProvider`, `SqliteMetadataProvider`, `SqlServerMetadataProvider` — concrete implementations with database-specific SQL. Postgres provider also extracts `varchar[]` array element lengths.
   - `MetadataProviderFactory` — selects provider by `dbType`.
-- **`DbConnectionFactory.cs`** — Factory creating ADO.NET `DbConnection` instances (Npgsql, MySql.Data, Sqlite).
+- **`DbConnectionFactory.cs`** — Factory creating ADO.NET `DbConnection` instances (Npgsql, MySql.Data, Sqlite, Microsoft.Data.SqlClient).
 - **`MarkdownTableFormatter.cs`** — Converts `DbDataReader` to GitHub-flavored markdown tables with proper escaping.
 
 ### Test project (`scripts/test/SharpDbTest/`)
@@ -42,4 +42,8 @@ The skill is invoked via `/sharp-db` in Claude Code. It wraps the CLI binary and
 
 ### Connection string aliases
 
-`DbConnectionFactory` accepts both `postgres` and `postgresql` as type values.
+`DbConnectionFactory` accepts both `postgres` and `postgresql`, as well as `sqlserver` and `mssql`, as type values.
+
+### Integration tests
+
+`MySqlMetadataTests` and `SqlServerMetadataTests` run against real databases and are skipped unless `SHARP_DB_MYSQL_CONNECTION_STRING` / `SHARP_DB_SQLSERVER_CONNECTION_STRING` environment variables are set.
