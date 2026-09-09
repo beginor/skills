@@ -3,6 +3,7 @@
 ## 2026-09-09
 
 - **sharp-db**
+  - 在四个元数据提供者的 `GetColumnsQuery()` 原始字符串前添加 `// language=none` 注释，避免 IDE（如 Rider）将内嵌 SQL 误当作 C# 代码解析，消除误报
   - 新增 SQL Server 支持（`--db-type sqlserver`，别名 `mssql`），基于 Microsoft.Data.SqlClient；`tables` / `columns` 支持主键、外键、关联对象、表/列描述及字符串类型长度
   - 新增 SQL Server 复合外键集成测试（`SHARP_DB_SQLSERVER_CONNECTION_STRING` 环境变量，未设置时跳过）
   - 升级 NuGet 包版本：Microsoft.Data.SqlClient 7.0.2、Microsoft.NET.Test.Sdk 18.9.0、Microsoft.Data.Sqlite 10.0.11、MySql.Data 26.7.0、NUnit3TestAdapter 6.3.0

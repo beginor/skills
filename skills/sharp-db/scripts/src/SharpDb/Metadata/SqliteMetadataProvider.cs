@@ -47,6 +47,7 @@ internal sealed class SqliteMetadataProvider(
     }
 
     protected override string GetColumnsQuery() {
+        // language=none
         return """
             select 'main' as table_schema,
                    @tableName as table_name,

@@ -84,6 +84,7 @@ internal sealed class SqlServerMetadataProvider(
     }
 
     protected override string GetColumnsQuery() {
+        // language=none
         return """
             select schemas.name as table_schema,
                    objects.name as table_name,

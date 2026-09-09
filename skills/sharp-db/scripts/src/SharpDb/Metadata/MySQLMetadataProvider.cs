@@ -49,6 +49,7 @@ internal sealed class MySQLMetadataProvider(
     }
 
     protected override string GetColumnsQuery() {
+        // language=none
         return """
             select columns.table_schema as table_schema,
                    columns.table_name as table_name,

@@ -88,6 +88,7 @@ internal sealed class PostgresMetadataProvider(
     }
 
     protected override string GetColumnsQuery() {
+        // language=none
         return """
             with primary_key_columns as (
                 select child_namespaces.nspname as table_schema,
